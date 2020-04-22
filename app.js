@@ -9,6 +9,8 @@ require("dotenv").config();
 // const Author = require('./src/models/authors');
 const {createAuthor, updateAuthor, deleteAuthor, readAuthor} = require("./src/controllers/authorControllers");
 const {createGenre, readGenres} = require("./src/controllers/genreControllers");
+const {createUser} = require('./src/controllers/userControllers');
+const {login} = require('./src/controllers/authControllers');
 
 
 mongoose.connect(process.env.BD_LOCAL, {
@@ -50,6 +52,12 @@ router.route('/genres')
 
 router.route('/books')
 .post(createBook)
+
+router.route("/users")
+.post(createUser)
+
+router.route('/auth/login')
+.post(login)
 
 
 module.exports = app;

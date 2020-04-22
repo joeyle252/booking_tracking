@@ -1,41 +1,60 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const express = require('express');
+const logger = require('morgan');
+const app = express();
 
-var app = express();
+const mongoose = require("mongoose");
+require("dotenv").config();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+// const Author = require('./src/models/authors');
+const {createAuthor, updateAuthor, deleteAuthor, readAuthor} = require("./src/controllers/authorControllers");
+const {createGenre, readGenres} = require("./src/controllers/genreControllers");
+
+
+mongoose.connect(process.env.BD_LOCAL, {
+  // some options to deal with deprecated warning, you don't have to worry about them.
+  useCreateIndex: true,
+  useNewUrlParser: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true
+})
+  .then(() => console.log("connected to database"));
+
+  const router = express.Router();
+  
+  app.use(bodyParser.urlencoded({extended: true}));
+  app.use(bodyParser.json());
+  app.use(router);
+
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+router.get('/', (req,res)=>{
+  return res.status(200).json({status: "ok", data:[]})
+})
+
+router.route('/authors')
+.get(readAuthor)
+.post(createAuthor)
+
+router.delete("/authors/:id", deleteAuthor);
+router.put("/authors/:id", updateAuthor);
+
+router.route('/genres')
+.post(createGenre)
+.get(readGenres)
+
+router.route('/books')
+.post(createBook)
+
 
 module.exports = app;
+
+
+app.listen(process.env.PORT,()=>{
+  console.log("app is rungning on port",process.env.PORT )
+})
